@@ -4,7 +4,7 @@ import Popup from './Popup';
 import Alert from './Alert';
 import './App.css';
 
-const images = import.meta.glob('./assets/*.{jpg,png,svg}', { eager: true });
+const images = import.meta.glob('./assets/*.{jpg,jpeg,png,svg}', { eager: true });
 const SECRET_KEY = "c308ca49589aef7dc0cc1203f4b0c0509f5be7d20700fb80b4a45236f35a8ad7";
 
 
