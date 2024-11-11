@@ -5,9 +5,12 @@ type ModalProps = {
     message: string;
     onConfirm: () => void;
     onCancel: () => void;
+    isVisible: boolean; // Control modal visibility
 };
 
-const Modal: React.FC<ModalProps> = ({ message, onConfirm, onCancel }) => {
+const Modal: React.FC<ModalProps> = ({ message, onConfirm, onCancel, isVisible }) => {
+    if (!isVisible) return null; // Hide the modal when not visible
+
     return (
         <div className="modal-overlay">
             <div className="modal">

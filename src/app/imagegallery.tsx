@@ -1,11 +1,11 @@
 "use client";
 
-import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
-import images from './urls.json';
 import CustomAlert from './customalert';
+import images from './urls.json';
+import Image from 'next/image';
 import './imagegallery.css';
-import './modal.css';
+import Modal from './modal';
 
 const getCookie = (name: string): string | null => {
     if (typeof window !== "undefined") {
@@ -22,6 +22,19 @@ const setCookie = (name: string, value: string, days: number, sameSite: 'Lax' | 
     const expires = "expires=" + date.toUTCString();
     const secureFlag = secure ? "; Secure" : "";
     document.cookie = `${name}=${value}; ${expires}; path=/;  SameSite=${sameSite}${secureFlag}`;
+};
+const getDownloadedImagesFromCookie = (): Set<string> => {
+    if (typeof window !== "undefined") {
+        const cookie = getCookie('downloaded_images');
+        return cookie ? new Set(JSON.parse(cookie)) : new Set();
+    }
+    return new Set();
+};
+
+const saveDownloadedImagesToCookie = (downloadedImages: Set<string>) => {
+    if (typeof window !== "undefined") {
+        setCookie('downloaded_images', JSON.stringify(Array.from(downloadedImages)), 365);
+    }
 };
 
 const downloadImage = async (url: string, setAlertMessage: (msg: string) => void) => {
@@ -45,7 +58,7 @@ const downloadImage = async (url: string, setAlertMessage: (msg: string) => void
 };
 
 const getFavoritesFromCookie = (): Set<string> => {
-    if (typeof window !== "undefined") { // Ensure we are in the browser
+    if (typeof window !== "undefined") {
         const cookie = getCookie('favorites');
         return cookie ? new Set(JSON.parse(cookie)) : new Set();
     }
@@ -71,6 +84,44 @@ const ImageGallery = () => {
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [alertMessage, setAlertMessage] = useState<string>('');
     const [filter, setFilter] = useState<'all' | 'favorites'>('all');  // Filter state
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+    const [downloadedImages, setDownloadedImages] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        setDownloadedImages(getDownloadedImagesFromCookie());
+    }, []);
+
+    const handleDownloadClick = (url: string) => {
+        if (downloadedImages.has(url)) {
+            setSelectedImage(url);
+            setIsModalVisible(true);
+        } else {
+            downloadImage(url, setAlertMessage);
+            const updatedDownloadedImages = new Set(downloadedImages);
+            updatedDownloadedImages.add(url);
+            setDownloadedImages(updatedDownloadedImages);
+            saveDownloadedImagesToCookie(updatedDownloadedImages);
+        }
+    };
+
+    const handleConfirmDownload = () => {
+        if (selectedImage) {
+            downloadImage(selectedImage, setAlertMessage);
+            setDownloadedImages((prev) => {
+                const newSet = new Set(prev);
+                newSet.add(selectedImage);
+                saveDownloadedImagesToCookie(newSet);
+                return newSet;
+            });
+        }
+        setIsModalVisible(false);
+    };
+
+    const handleCancelDownload = () => {
+        setSelectedImage(null);
+        setIsModalVisible(false);
+    };
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -114,6 +165,13 @@ const ImageGallery = () => {
                 <CustomAlert message={alertMessage} onClose={() => setAlertMessage('')} />
             )}
 
+            {/* Modal for confirmation */}
+            <Modal
+                message="Do you want to download this image?"
+                onConfirm={handleConfirmDownload}
+                onCancel={handleCancelDownload}
+                isVisible={isModalVisible}
+            />
             {/* Filter Buttons */}
             <div className="filter-buttons">
                 <button onClick={() => handleFilterChange('all')} className={filter === 'all' ? 'active' : ''}>
@@ -136,7 +194,7 @@ const ImageGallery = () => {
                             height={200}
                             quality={80}
                             onClick={() => {
-                                downloadImage(img.url, setAlertMessage);
+                                 handleDownloadClick(img.url);
                             }
                             }
                             className="zoom-effect"
