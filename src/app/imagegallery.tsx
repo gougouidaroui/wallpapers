@@ -4,83 +4,54 @@ import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import images from './urls.json';
 import CustomAlert from './customalert';
-import Modal from './modal';  // Import the Modal component
 import './imagegallery.css';
+import './modal.css';
 
 const getCookie = (name: string): string | null => {
-  if (typeof window !== "undefined") { // Check if we are in the browser
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  }
-  return null;
+    if (typeof window !== "undefined") {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    }
+    return null;
 };
 
-const setCookie = (name: string, value: string, days: number) => {
+const setCookie = (name: string, value: string, days: number, sameSite: 'Lax' | 'Strict' | 'None' = 'Lax', secure: boolean = false) => {
     const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000)); // expires in `days`
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + date.toUTCString();
-    document.cookie = `${name}=${value}; ${expires}; path=/`;
+    const secureFlag = secure ? "; Secure" : "";
+    document.cookie = `${name}=${value}; ${expires}; path=/;  SameSite=${sameSite}${secureFlag}`;
 };
 
-// Helper functions for managing cookies for downloaded images
-const getDownloadedImagesFromCookie = (): Set<string> => {
-  if (typeof window !== "undefined") { // Ensure we are in the browser
-    const cookie = getCookie('downloaded_images');
-    return cookie ? new Set(JSON.parse(cookie)) : new Set();
-  }
-  return new Set();
-};
+const downloadImage = async (url: string, setAlertMessage: (msg: string) => void) => {
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = url.split('/').pop() || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
 
-const saveDownloadedImagesToCookie = (downloadedImages: Set<string>) => {
-  if (typeof window !== "undefined") { // Ensure we are in the browser
-    setCookie('downloaded_images', JSON.stringify(Array.from(downloadedImages)), 365); // Expires in 1 year
-  }
-};
-
-
-const downloadImage = async (url: string, setAlertMessage: (msg: string) => void, downloadedImages: Set<string>, setDownloadedImages: React.Dispatch<React.SetStateAction<Set<string>>>, setShowModal: React.Dispatch<React.SetStateAction<boolean>>, setModalMessage: React.Dispatch<React.SetStateAction<string>>) => {
-    if (downloadedImages.has(url)) {
-        setModalMessage("You've already downloaded this image. Do you want to download it again?");
-        setShowModal(true);
-    } else {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = url.split('/').pop() || 'download';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(downloadUrl);
-
-            // Update the downloaded images list in cookie
-            const newDownloadedImages = new Set(downloadedImages);
-            newDownloadedImages.add(url);
-            setDownloadedImages(newDownloadedImages);
-            saveDownloadedImagesToCookie(newDownloadedImages); // Save to cookie
-
-            setAlertMessage('Image downloaded successfully!');
-        } catch (e) {
-            setAlertMessage('Failed to download image.');
-            console.log(e);
-        }
+        setAlertMessage('Image downloaded successfully!');
+    } catch (e) {
+        setAlertMessage('Failed to download image.');
+        console.log(e);
     }
 };
 
-// Helper functions for managing cookies
 const getFavoritesFromCookie = (): Set<string> => {
-  if (typeof window !== "undefined") { // Ensure we are in the browser
-    const cookie = getCookie('favorites');
-    return cookie ? new Set(JSON.parse(cookie)) : new Set();
-  }
-  return new Set();
+    if (typeof window !== "undefined") { // Ensure we are in the browser
+        const cookie = getCookie('favorites');
+        return cookie ? new Set(JSON.parse(cookie)) : new Set();
+    }
+    return new Set();
 };
 
-
-// Favorite button component
 const FavoriteButton = ({ isFavorite, onClick }: { isFavorite: boolean; onClick: () => void }) => (
     <button onClick={onClick} className={isFavorite ? 'favorite active' : 'favorite'}>
         <svg
@@ -97,44 +68,31 @@ const FavoriteButton = ({ isFavorite, onClick }: { isFavorite: boolean; onClick:
 );
 
 const ImageGallery = () => {
-      const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [alertMessage, setAlertMessage] = useState<string>('');
     const [filter, setFilter] = useState<'all' | 'favorites'>('all');  // Filter state
-    const [downloadedImages, setDownloadedImages] = useState<Set<string>>(getDownloadedImagesFromCookie());
-    const [showModal, setShowModal] = useState<boolean>(false); // Modal visibility state
-    const [modalMessage, setModalMessage] = useState<string>('');
-    const handleConfirmDownload = (url: string) => {
-        downloadImage(url, setAlertMessage, downloadedImages, setDownloadedImages, setShowModal, setModalMessage);
-        setShowModal(false); // Close modal after confirmation
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const savedFavorites = getCookie('favorites');
+            if (savedFavorites) {
+                setFavorites(new Set(JSON.parse(savedFavorites)));
+            }
+        }
+    }, []);
+
+    const toggleFavorite = (url: string) => {
+        setFavorites((prev) => {
+            const newFavorites = new Set(prev);
+            if (newFavorites.has(url)) {
+                newFavorites.delete(url);
+            } else {
+                newFavorites.add(url);
+            }
+            setCookie('favorites', JSON.stringify(Array.from(newFavorites)), 365, 'Strict', true);
+            return newFavorites;
+        });
     };
-      useEffect(() => {
-    // Check if the component is mounted on the client-side
-    if (typeof window !== "undefined") {
-      // Retrieve the 'favorites' from cookies on the client-side
-      const savedFavorites = getCookie('favorites');
-      if (savedFavorites) {
-        setFavorites(new Set(JSON.parse(savedFavorites)));
-      }
-    }
-  }, []); // Run this only on the client after initial render
-
-      const toggleFavorite = (url: string) => {
-    setFavorites((prev) => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(url)) {
-        newFavorites.delete(url);
-      } else {
-        newFavorites.add(url);
-      }
-      setCookie('favorites', JSON.stringify(Array.from(newFavorites)), 365); // Save updated favorites to cookies
-      return newFavorites;
-    });
-  };
-
-    const handleCancelDownload = () => {
-        setShowModal(false); // Close modal on cancel
-    };
-
 
     const isFavorite = (url: string) => favorites.has(url);
 
@@ -143,11 +101,9 @@ const ImageGallery = () => {
     };
 
     useEffect(() => {
-        // Sync favorites from cookie when component mounts
         setFavorites(getFavoritesFromCookie());
     }, []);
 
-    // Filter images based on the selected filter
     const filteredImages = filter === 'favorites'
         ? images.filter(img => isFavorite(img.url))
         : images;
@@ -156,15 +112,6 @@ const ImageGallery = () => {
         <>
             {alertMessage && (
                 <CustomAlert message={alertMessage} onClose={() => setAlertMessage('')} />
-            )}
-
-            {/* Modal */}
-            {showModal && (
-                <Modal
-                    message={modalMessage}
-                    onConfirm={() => handleConfirmDownload(filteredImages[0]?.url)} // Use selected image URL here
-                    onCancel={handleCancelDownload}
-                />
             )}
 
             {/* Filter Buttons */}
@@ -188,7 +135,10 @@ const ImageGallery = () => {
                             width={300}
                             height={200}
                             quality={80}
-                            onClick={() => downloadImage(img.url, setAlertMessage, downloadedImages, setDownloadedImages, setShowModal, setModalMessage)}
+                            onClick={() => {
+                                downloadImage(img.url, setAlertMessage);
+                            }
+                            }
                             className="zoom-effect"
                         />
                         <div className="button-container">
