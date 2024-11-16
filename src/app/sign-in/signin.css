@@ -1,0 +1,81 @@
+:root {
+    --color-surface: #2a273f;
+    --color-pine: #3e8fb0;
+    --color-hightlighted-pine: #3e8fff;
+}
+body {
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+.login-container {
+    background-color: var(--color-surface);
+    min-width: 400px;
+    min-height: 500px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    border-radius: 40px;
+}
+h1 {
+    flex-basis: 100%;
+    margin-bottom: 4rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.login-fields {
+    margin-bottom: 1rem;
+    width: 100%;
+
+}
+.login-container button {
+    flex-basis: 100%;
+    justify-content: center;
+}
+form {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    min-width: 300px;
+    align-items: center;
+}
+form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+form input {
+    width:100%;
+    min-height: 30px;
+    border-radius:8px;
+    color: black;
+    padding: 8px;
+}
+button:first {
+    margin-top: 2rem;
+}
+button {
+    border: 2px solid var(--color-pine);
+    width: 80%;
+    min-height: 30px;
+    border-radius: 8px;
+    margin: 5px auto;
+}
+.login-container *:nth-child(3){
+    margin:1rem auto;
+}
+button:hover {
+    background-color: var(--color-pine);
+}
+a {
+    color: #3e8fb0;
+}
+
+hr {
+    width: 75%;
+    border-top: 2px solid var(--color-pine);
+
+}
