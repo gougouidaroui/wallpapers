@@ -61,6 +61,7 @@ button {
     border: 2px solid var(--color-pine);
     width: 80%;
     min-height: 30px;
+    max-height: 30px;
     border-radius: 8px;
     margin: 5px auto;
 }

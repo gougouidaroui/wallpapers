@@ -1,6 +1,6 @@
 'use client'
 import { useState, FormEvent} from 'react';
-import { signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword,OAuthProvider, signInAnonymously, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebaseconfig';
 import './login.css';
 import '../awesome/css/all.min.css';
@@ -22,6 +22,17 @@ const LoginPage: React.FC = () => {
             }
         }
     };
+    const handleAppleLogin = async () => {
+        const provider = new OAuthProvider('apple.com');
+        try {
+            await signInWithPopup(auth, provider);
+            window.location.href = '../wallpapers';
+
+        } catch (error) {
+            console.error('Error during Apple login:', error);
+        }
+    };
+
 
     const handleAnonymousLogin = async () => {
         const storedUserId = localStorage.getItem('anonymousUserId');
@@ -101,6 +112,7 @@ return (
 <hr />
 <button onClick={handleGoogleLogin}><span className="fa-brands fa-google"></span>oogle</button>
 <button onClick={handleAnonymousLogin}><span className="fa-solid fa-hat-wizard"></span> Anonymous</button>
+<button onClick={handleAppleLogin}><span className="fa-brands fa-apple"></span> Apple</button>
 </div>
 );
 };

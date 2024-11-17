@@ -2,8 +2,8 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebaseconfig';
-import './signin.css';
 import '../awesome/css/all.min.css';
+import './signin.css';
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
