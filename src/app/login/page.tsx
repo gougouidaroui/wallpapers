@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, FormEvent} from 'react';
+import { useState, FormEvent} from 'react';
 import { signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebaseconfig';
 import './login.css';
@@ -24,28 +24,37 @@ const LoginPage: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        const storedId = localStorage.getItem('anonymousUserId');
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = '/wallpapers';
-            } else if (storedId) {
-                console.log('Found stored ID:', storedId);
-                window.location.href = '/wallpapers';
-            }
-        });
-    }, []);
-
-
     const handleAnonymousLogin = async () => {
-        try {
-            const userCredential = await signInAnonymously(auth);
-            const userId = userCredential.user.uid;
-            localStorage.setItem('anonymousUserId', userId);
-            window.location.href = '/wallpapers';
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
+        const storedUserId = localStorage.getItem('anonymousUserId');
+
+        if (storedUserId && storedUserId !== "") {
+            onAuthStateChanged(auth, (user) => {
+                if (user && user.isAnonymous && user.uid === storedUserId) {
+                    window.location.href = '/wallpapers';
+                } else {
+                    signInAnonymously(auth)
+                        .then((userCredential) => {
+                            const newUserId = userCredential.user.uid;
+                            localStorage.setItem('anonymousUserId', newUserId);
+                            window.location.href = '/wallpapers';
+                        })
+                        .catch((err: unknown) => {
+                            if (err instanceof Error) {
+                                setError(err.message);
+                            }
+                        });
+                }
+            });
+        } else {
+            try {
+                const userCredential = await signInAnonymously(auth);
+                const userId = userCredential.user.uid;
+                localStorage.setItem('anonymousUserId', userId);
+                window.location.href = '/wallpapers';
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                }
             }
         }
     };

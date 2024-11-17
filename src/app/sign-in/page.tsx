@@ -14,14 +14,8 @@ const SignInPage: React.FC = () => {
   const googleProvider = new GoogleAuthProvider();
 
     useEffect(() => {
-        const storedId = localStorage.getItem('anonymousUserId');
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Redirect logged-in users to
-                window.location.href = '/wallpapers';
-            } else if (storedId) {
-                // Logic to use the stored ID if necessary (e.g., auto-login or redirect)
-                console.log('Found stored ID:', storedId);
                 window.location.href = '/wallpapers';
             }
         });
