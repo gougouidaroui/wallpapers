@@ -4,8 +4,6 @@ import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,onAuthS
 import { auth } from '../../lib/firebaseconfig';
 import './signin.css';
 import '../awesome/css/all.min.css';
-import Link from 'next/link';
-
 
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -16,7 +14,7 @@ const SignInPage: React.FC = () => {
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                window.location.href = '/wallpapers';
+                window.location.href = '../wallpapers';
             }
         });
     }, []);
@@ -25,7 +23,7 @@ const SignInPage: React.FC = () => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = '/';
+      window.location.href = '../wallpapers';
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -36,7 +34,7 @@ const SignInPage: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      window.location.href = '/';
+      window.location.href = '../wallpapers';
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -67,7 +65,7 @@ const SignInPage: React.FC = () => {
             required
           />
         </div>
-        <p>Already have an account? <Link href="/wallpapers/login">Login</Link></p>
+        <p>Already have an account? <a href="../wallpapers/login">Login</a></p>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Sign In</button>
       </form>

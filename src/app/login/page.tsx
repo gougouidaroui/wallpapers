@@ -3,7 +3,6 @@ import { useState, FormEvent} from 'react';
 import { signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebaseconfig';
 import './login.css';
-import Link from 'next/link';
 import '../awesome/css/all.min.css';
 
 const LoginPage: React.FC = () => {
@@ -16,10 +15,10 @@ const LoginPage: React.FC = () => {
         e.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = '/wallpapers';
+            window.location.href = '../wallpapers';
         } catch (err: unknown) {
             if (err instanceof Error){
-            setError(err.message);
+                setError(err.message);
             }
         }
     };
@@ -30,18 +29,18 @@ const LoginPage: React.FC = () => {
         if (storedUserId && storedUserId !== "") {
             onAuthStateChanged(auth, (user) => {
                 if (user && user.isAnonymous && user.uid === storedUserId) {
-                    window.location.href = '/wallpapers';
+                    window.location.href = '../wallpapers';
                 } else {
                     signInAnonymously(auth)
                         .then((userCredential) => {
                             const newUserId = userCredential.user.uid;
                             localStorage.setItem('anonymousUserId', newUserId);
-                            window.location.href = '/wallpapers';
+                            window.location.href = '../wallpapers';
                         })
                         .catch((err: unknown) => {
                             if (err instanceof Error) {
                                 setError(err.message);
-                            }
+                        }
                         });
                 }
             });
@@ -50,29 +49,30 @@ const LoginPage: React.FC = () => {
                 const userCredential = await signInAnonymously(auth);
                 const userId = userCredential.user.uid;
                 localStorage.setItem('anonymousUserId', userId);
-                window.location.href = '/wallpapers';
+                window.location.href = '../wallpapers';
             } catch (err: unknown) {
                 if (err instanceof Error) {
                     setError(err.message);
-                }
             }
         }
-    };
+    }
+};
 
-    const handleGoogleLogin = async () => {
-        try {
-            await signInWithPopup(auth, googleProvider);
-            window.location.href = '/wallpapers';
-        } catch (err: unknown) {
-            if (err instanceof Error) {
+const handleGoogleLogin = async () => {
+    try {
+        await signInWithPopup(auth, googleProvider);
+        window.location.href = '../wallpapers';
+
+    } catch (err: unknown) {
+        if (err instanceof Error) {
                 setError(err.message);
-            }
-        }
+    }
+}
     };
 
 
 
-  return (
+return (
     <div className='login-container'>
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
@@ -94,15 +94,15 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <p>Don&apos;t have an account? <Link href="/wallpapers/sign-in">Sign in</Link></p>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Login</button>
-      </form>
-      <hr />
-      <button onClick={handleGoogleLogin}><span className="fa-brands fa-google"></span>oogle</button>
-      <button onClick={handleAnonymousLogin}><span className="fa-solid fa-hat-wizard"></span> Anonymous</button>
-    </div>
-  );
+<p>Don&apos;t have an account? <a href="../wallpapers/sign-in">Sign in</a></p>
+{error && <p style={{ color: 'red' }}>{error}</p>}
+<button type="submit">Login</button>
+</form>
+<hr />
+<button onClick={handleGoogleLogin}><span className="fa-brands fa-google"></span>oogle</button>
+<button onClick={handleAnonymousLogin}><span className="fa-solid fa-hat-wizard"></span> Anonymous</button>
+</div>
+);
 };
 
 export default LoginPage;
