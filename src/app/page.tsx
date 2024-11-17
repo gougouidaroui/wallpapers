@@ -29,7 +29,7 @@ export default function Home() {
                             <li><button onClick={handleLogout}>Logout</button></li>
                         </>
                     ) : (
-                            <li><a href="/login">Login</a></li>
+                            <li><a href="/wallpapers/login">Login</a></li>
                         )}
                     <li><a href="https://github.com/gougouidaroui"><span className="fa-brands fa-github"></span></a></li>
                     <li><a href="https://www.instagram.com/gougouidaroui/"><span className="fa-brands fa-instagram"></span></a></li>

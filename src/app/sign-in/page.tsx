@@ -18,11 +18,11 @@ const SignInPage: React.FC = () => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // Redirect logged-in users to
-                window.location.href = '/';
+                window.location.href = '/wallpapers';
             } else if (storedId) {
                 // Logic to use the stored ID if necessary (e.g., auto-login or redirect)
                 console.log('Found stored ID:', storedId);
-                window.location.href = '/';
+                window.location.href = '/wallpapers';
             }
         });
     }, []);
@@ -73,7 +73,7 @@ const SignInPage: React.FC = () => {
             required
           />
         </div>
-        <p>Already have an account? <Link href="login">Login</Link></p>
+        <p>Already have an account? <Link href="/wallpapers/login">Login</Link></p>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Sign In</button>
       </form>

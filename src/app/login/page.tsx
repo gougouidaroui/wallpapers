@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, sign
 import { auth } from '../../lib/firebaseconfig';
 import './login.css';
 import Link from 'next/link';
+import '../awesome/css/all.min.css';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState<string>('');
@@ -15,7 +16,7 @@ const LoginPage: React.FC = () => {
         e.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = '/';
+            window.location.href = '/wallpapers';
         } catch (err: unknown) {
             if (err instanceof Error){
             setError(err.message);
@@ -27,10 +28,10 @@ const LoginPage: React.FC = () => {
         const storedId = localStorage.getItem('anonymousUserId');
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                window.location.href = '/';
+                window.location.href = '/wallpapers';
             } else if (storedId) {
                 console.log('Found stored ID:', storedId);
-                window.location.href = '/';
+                window.location.href = '/wallpapers';
             }
         });
     }, []);
@@ -41,7 +42,7 @@ const LoginPage: React.FC = () => {
             const userCredential = await signInAnonymously(auth);
             const userId = userCredential.user.uid;
             localStorage.setItem('anonymousUserId', userId);
-            window.location.href = '/';
+            window.location.href = '/wallpapers';
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -52,7 +53,7 @@ const LoginPage: React.FC = () => {
     const handleGoogleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
-            window.location.href = '/';
+            window.location.href = '/wallpapers';
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -84,7 +85,7 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <p>Don&apos;t have an account? <Link href="sign-in">Sign in</Link></p>
+        <p>Don&apos;t have an account? <Link href="/wallpapers/sign-in">Sign in</Link></p>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>
