@@ -25,14 +25,14 @@ export default function Home() {
                     <li><a href=""><h2>Wallpapers Project</h2></a></li>
                     {user ? (
                         <>
-                            <li>{user.email || 'Anonymous'}</li>
-                            <li><button onClick={handleLogout}>Logout</button></li>
+                            <li className='email'>{user.email || 'Anonymous'}</li>
+                            <li ><button className="login" onClick={handleLogout}>Logout</button></li>
                         </>
                     ) : (
-                            <li><a href="/wallpapers/login">Login</a></li>
+                            <li className='login'><a href="/wallpapers/login">Login</a></li>
                         )}
-                    <li><a href="https://github.com/gougouidaroui"><span className="fa-brands fa-github"></span></a></li>
-                    <li><a href="https://www.instagram.com/gougouidaroui/"><span className="fa-brands fa-instagram"></span></a></li>
+                    <li className='icons'><a href="https://github.com/gougouidaroui"><span className="fa-brands fa-github"></span></a></li>
+                    <li className='icons'><a href="https://www.instagram.com/gougouidaroui/"><span className="fa-brands fa-instagram"></span></a></li>
                 </ul>
             </header>
             <main>
