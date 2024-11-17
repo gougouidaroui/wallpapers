@@ -16,8 +16,10 @@ const LoginPage: React.FC = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             window.location.href = '/';
-        } catch (err: any) {
+        } catch (err: unknown) {
+            if (err instanceof Error){
             setError(err.message);
+            }
         }
     };
 
@@ -82,7 +84,7 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <p>Don't have an account? <Link href="sign-in">Sign in</Link></p>
+        <p>Don&apos;t have an account? <Link href="sign-in">Sign in</Link></p>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>

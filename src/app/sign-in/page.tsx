@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, FormEvent } from 'react';
-import { signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebaseconfig';
 import './signin.css';
 import '../awesome/css/all.min.css';
@@ -31,19 +31,6 @@ const SignInPage: React.FC = () => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = '/';
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-    }
-  };
-
-  const handleAnonymousLogin = async () => {
-    try {
-      const userCredential = await signInAnonymously(auth);
-      const userId = userCredential.user.uid;
-      localStorage.setItem('anonymousUserId', userId); // Store the user ID in the browser
       window.location.href = '/';
     } catch (err: unknown) {
       if (err instanceof Error) {
