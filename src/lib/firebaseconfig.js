@@ -3,7 +3,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_API_KEY,
+    apiKey: process.env.NEXT_PUBLIC_API_KEY || "dummy-key-for-build",
     authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
     projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
     storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
@@ -12,19 +12,7 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_MESSUREMANT_ID
 };
 
-let app;
-let db;
-let auth;
-
-if (typeof window !== 'undefined' && !getApps().length) {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-} else if (getApps().length > 0) {
-    app = getApps()[0];
-    db = getFirestore(app);
-    auth = getAuth(app);
-}
-
-export { db, auth };
+const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+export const auth = getAuth(app);
 export default app;
