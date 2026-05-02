@@ -135,14 +135,26 @@ const ImageGallery = () => {
         : images;
 
     if (isLoading) {
-        return <div className="loading">Loading favorites...</div>;
+        return (
+            <div className="loading">
+                <div className="loading-spinner" />
+            </div>
+        );
     }
-    const FavoriteButton = ({ isFavorite, onClick }: { isFavorite: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={isFavorite ? 'favorite active' : 'favorite'}>
+
+    const FavoriteButton = ({ isFav, onClick }: { isFav: boolean; onClick: () => void }) => (
+        <button
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+            }}
+            className={`favorite-btn ${isFav ? 'active' : ''}`}
+            aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+        >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                fill={isFavorite ? 'red' : 'none'}
+                fill={isFav ? 'currentColor' : 'none'}
                 stroke="currentColor"
                 strokeWidth="2"
                 className="heart-icon"
@@ -152,55 +164,73 @@ const ImageGallery = () => {
         </button>
     );
 
+    const DownloadIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+    );
+
     return (
         <>
             {alertMessage && (
                 <CustomAlert message={alertMessage} onClose={() => setAlertMessage('')} />
             )}
 
-            {/* Modal for confirmation */}
             <Modal
                 message="Do you want to download this image?"
                 onConfirm={handleConfirmDownload}
                 onCancel={handleCancelDownload}
                 isVisible={isModalVisible}
             />
-            {/* Filter Buttons */}
-            <div className="filter-buttons">
-                <button onClick={() => handleFilterChange('all')} className={filter === 'all' ? 'active' : ''}>
-                    All Images
+
+            <div className="filter-tabs">
+                <button
+                    onClick={() => handleFilterChange('all')}
+                    className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+                >
+                    All
+                    <span className="count">{images.length}</span>
                 </button>
-                <button onClick={() => handleFilterChange('favorites')} className={filter === 'favorites' ? 'active' : ''}>
+                <button
+                    onClick={() => handleFilterChange('favorites')}
+                    className={`filter-tab ${filter === 'favorites' ? 'active' : ''}`}
+                >
                     Favorites
+                    <span className="count">{favorites.size}</span>
                 </button>
             </div>
 
-            {/* Image Gallery */}
-            {filteredImages.map((img) => (
-                <div key={img.key} className="image-container">
-                    <div className="image-wrapper">
-                        <Image
-                            priority={true}
-                            src={img.url}
-                            alt={img.name}
-                            width={300}
-                            height={200}
-                            quality={80}
-                            onClick={() => {
-                                 handleDownloadClick(img.url);
-                            }
-                            }
-                            className="zoom-effect"
-                        />
-                        <div className="button-container">
+            <div id="images">
+                {filteredImages.map((img, index) => (
+                    <div key={img.key} className="image-container" style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}>
+                        <div className="image-wrapper" onClick={() => handleDownloadClick(img.url)}>
+                            <Image
+                                priority={index < 6}
+                                src={img.url}
+                                alt={img.name}
+                                width={300}
+                                height={533}
+                                quality={80}
+                            />
+                            <div className="image-overlay">
+                                <span className="image-name">{img.name}</span>
+                            </div>
+                        </div>
+                        <div className="card-footer">
+                            <button className="download-btn" onClick={() => handleDownloadClick(img.url)}>
+                                <DownloadIcon />
+                                Download
+                            </button>
                             <FavoriteButton
-                                isFavorite={isFavorite(img.url)}
+                                isFav={isFavorite(img.url)}
                                 onClick={() => toggleFavorite(img.url)}
                             />
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </>
     );
 };

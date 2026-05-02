@@ -39,3 +39,7 @@ next-env.d.ts
 
 # testing
 coverage/
+
+# skills
+.skills/
+skills/
